@@ -1,0 +1,19 @@
+{
+  "name": "zhihu",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "body-parser": "^1.18.3",
+    "connect-redis": "^3.4.1",
+    "eventproxy": "^1.0.0",
+    "express": "^4.16.4",
+    "express-session": "^1.15.6",
+    "mongoose": "^5.4.19"
+  }
+}
