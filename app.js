@@ -1,54 +1,64 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const session = require('express-session');
-const connectRedis = require('connect-redis')(session);
-const midware = require('./middleware');
-const apiRouter = require('./webApi');
-const config = require('./app.config');
+const path = require("path");
+const express = require("express");
+const bodyParser = require("body-parser");
+const session = require("express-session");
+const connectRedis = require("connect-redis")(session);
+const midware = require("./middleware");
+const apiRouter = require("./webApi");
+const config = require("./app.config");
 const app = express();
 
 var redisOpt = {
-    host: config.redisHost,
-    port: config.redisPort,
-    ttl: config.sessionTTL,
-    pass:config.RedisPass
-}
-app.use(bodyParser.json({
-    limit: '1mb'
-}))
-app.use(bodyParser.urlencoded({
+  host: config.redisHost,
+  port: config.redisPort,
+  ttl: config.sessionTTL,
+  pass: config.RedisPass
+};
+
+app.use("/static", express.static(path.join(__dirname, "static")));
+app.use(
+  bodyParser.json({
+    limit: "1mb"
+  })
+);
+app.use(
+  bodyParser.urlencoded({
     extended: true,
     limit: "1mb"
-}))
+  })
+);
 
 // 使用 session 中间件
-app.use(session({
+app.use(
+  session({
     secret: config.secretCode, // 对session id 相关的cookie 进行签名
     resave: true,
     saveUninitialized: false, // 是否保存未初始化的会话
     logErrors: true,
     store: new connectRedis(redisOpt),
     cookie: {
-        maxAge: config.sessionTTl * 1000, // 设置 session 的有效时间，单位毫秒
-    },
-}));
+      maxAge: config.sessionTTl * 1000 // 设置 session 的有效时间，单位毫秒
+    }
+  })
+);
 
-app.use(midware);
-app.all('/api/test', function (req, res, next) {
-    console.log(req.session);
-    res.json({
-        test: 'yes'
-    })
-})
+midware.register(app);
 
-app.use('/api', apiRouter);
+app.all("/api/test", function(req, res, next) {
+  console.log(req.session);
+  res.json({
+    test: "yes"
+  });
+});
 
-app.use(function (err, req, res, next) {
-    res.json({
-        code: err.code || 1,
-        status: 'error',
-        msg: err.tip || '服务器异常,请骚后再试',
-        err: err.message
-    })
+app.use("/api", apiRouter);
+
+app.use(function(err, req, res, next) {
+  res.json({
+    code: err.code || 1,
+    status: "error",
+    msg: err.tip || "服务器异常,请骚后再试",
+    err: err.message
+  });
 });
 app.listen(config.devPort);
