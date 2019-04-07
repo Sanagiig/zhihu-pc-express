@@ -30,12 +30,6 @@ const schema = Schema({
   followCount: Number,
   followedCount: Number,
   core: Number,
-  thumbArticles: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Articles"
-    }
-  ],
   articles: [
     {
       type: Schema.Types.ObjectId,
