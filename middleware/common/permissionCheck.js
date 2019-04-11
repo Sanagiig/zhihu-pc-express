@@ -17,7 +17,7 @@ function loginCheck(req, res, next) {
   if (!token) {
     for (var i = 0, len = loginList.length; i < len; i++) {
       var pattern = loginList[i];
-      if (_urlCheck(patter, path)) {
+      if (_urlCheck(pattern, path)) {
         err = new Error("请先登陆再访问相关内容");
         err.tip = "请先登陆再访问相关内容";
         err.code = 403;

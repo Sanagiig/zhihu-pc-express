@@ -30,14 +30,29 @@ const schema = Schema({
   followCount: Number,
   followedCount: Number,
   core: Number,
-  articles: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Articles"
-    }
-  ],
+  articles: {
+    type: [Number]
+  },
   articleCount: Number,
+
   commentCount: Number,
+  thumbUpArticle: {
+    type: [Number],
+    default: []
+  },
+  thumbDownArticle: {
+    type: [Number],
+    default: []
+  },
+  thumbUpComment: {
+    type: [Number],
+    default: []
+  },
+  thumbDownComment: {
+    type: [Number],
+    default: []
+  },
+
   createAt: {
     type: Date,
     default: Date.now

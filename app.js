@@ -5,6 +5,7 @@ const session = require("express-session");
 const connectRedis = require("connect-redis")(session);
 const midware = require("./middleware");
 const apiRouter = require("./webApi");
+const log = require("./recorder").log;
 const config = require("./app.config");
 const app = express();
 
@@ -31,6 +32,7 @@ app.use(
 // 使用 session 中间件
 app.use(
   session({
+    no_ready_check: true,
     secret: config.secretCode, // 对session id 相关的cookie 进行签名
     resave: true,
     saveUninitialized: false, // 是否保存未初始化的会话
@@ -54,6 +56,7 @@ app.all("/api/test", function(req, res, next) {
 app.use("/api", apiRouter);
 
 app.use(function(err, req, res, next) {
+  log("error", `${err.tip || "服务器异常, 请骚后再试"} [${err.message}]`);
   res.json({
     code: err.code || 1,
     status: "error",
