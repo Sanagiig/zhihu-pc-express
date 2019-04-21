@@ -6,7 +6,7 @@ const connectRedis = require("connect-redis")(session);
 const midware = require("./middleware");
 const apiRouter = require("./webApi");
 const log = require("./recorder").log;
-const config = require("./app.config");
+const config = require("./config");
 const app = express();
 
 var redisOpt = {
@@ -43,11 +43,13 @@ app.use(
     }
   })
 );
-
+app.use(function (req, res, next) {
+  next();
+})
 midware.register(app);
 
-app.all("/api/test", function(req, res, next) {
-  console.log(req.session);
+app.all("/api/test", function (req, res, next) {
+  console.log(req.body);
   res.json({
     test: "yes"
   });
@@ -55,7 +57,7 @@ app.all("/api/test", function(req, res, next) {
 
 app.use("/api", apiRouter);
 
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   log("error", `${err.tip || "服务器异常, 请骚后再试"} [${err.message}]`);
   res.json({
     code: err.code || 1,

@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const config = require("../../app.config");
+const config = require("../../config");
 const Articles = require("../../models").Articles;
 
 function charFactor(isUplower) {
   var start = isUplower ? 65 : 97;
   return String.fromCharCode(parseInt(Math.random() * 26) + start);
 }
+
 function strFactor(min, max) {
   min = min || 5;
   max = max || 15;
@@ -21,6 +22,7 @@ function strFactor(min, max) {
   }
   return result;
 }
+
 function articleFactor(wordNum) {
   wordNum = wordNum || 1000;
   var article = "";
@@ -36,10 +38,10 @@ function articleFactor(wordNum) {
   };
 }
 
-router.all("/", function(req, res, next) {
+router.all("/", function (req, res, next) {
   Articles.find({
-    id: req.body.id
-  })
+      id: req.body.id
+    })
     .populate({
       path: "author"
     })
@@ -51,13 +53,13 @@ router.all("/", function(req, res, next) {
     });
 });
 
-router.post("/multiUpload", function(req, res, next) {
+router.post("/multiUpload", function (req, res, next) {
   var num = req.body.num || 10;
   var articles = [];
   for (var i = 0; i < num; i++) {
     articles.push(articleFactor());
   }
-  Articles.insertMany(articles, function(err, data) {
+  Articles.insertMany(articles, function (err, data) {
     if (err) {
       err.tip = "生成文章失败";
       return next(err);

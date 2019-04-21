@@ -18,24 +18,60 @@ const schema = Schema({
     type: String,
     default: "normal"
   },
-  profileUrl: String,
-  nickname: String,
-  realName: String,
+  profileUrl: {
+    type: String,
+    default: '/static/images/guest_profile.jpg'
+  },
+  coverUrl: {
+    type: String,
+    default: "/static/images/default_cover.jpg"
+  },
+  nickname: {
+    type: String,
+    default: function () {
+      return Date.now().toString(32)
+    }
+  },
+  realName: {
+    type: String,
+    default: ''
+  },
   email: {
     type: String,
     marth: [/.*@.*\.(com|cn)/, "email is illegal"]
   },
+  // 性别
+  sex: Boolean,
+  // 简介
+  briefIntroduction: {
+    type: String,
+    default: '这家伙很懒啥也没留下~~'
+  },
+  // 详细介绍
+  introduction: {
+    type: String,
+    default: ''
+  },
+  address: String,
   github: String,
   hobby: String,
-  followCount: Number,
-  followedCount: Number,
   core: Number,
+  // 关注、被关注的信息
+  follow: {
+    type: Array,
+    default: []
+  },
+  followed: {
+    type: Array,
+    default: []
+  },
   articles: {
     type: [Number]
   },
-  articleCount: Number,
-
-  commentCount: Number,
+  articleCount: {
+    type: Number,
+    default: 0
+  },
   thumbUpArticle: {
     type: [Number],
     default: []
@@ -43,6 +79,13 @@ const schema = Schema({
   thumbDownArticle: {
     type: [Number],
     default: []
+  },
+  comments: {
+    type: [Number]
+  },
+  commentCount: {
+    type: Number,
+    default: 0
   },
   thumbUpComment: {
     type: [Number],
@@ -52,7 +95,6 @@ const schema = Schema({
     type: [Number],
     default: []
   },
-
   createAt: {
     type: Date,
     default: Date.now
