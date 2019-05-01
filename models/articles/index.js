@@ -56,5 +56,9 @@ var schema = new Schema({
   }
 });
 base(schema, "Articles");
-schema.index({ createAt: -1, updateAt: -1, id: -1 });
+schema.index({
+  createAt: -1,
+  updateAt: -1,
+  id: -1
+});
 mongoose.model("Articles", schema);

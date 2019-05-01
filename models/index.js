@@ -5,6 +5,8 @@ const log = require("../recorder").log;
 require("./users");
 require("./articles");
 require("./counters");
+require("./comments");
+require("./replies");
 
 mongoose.connect(config.dbUrl, {
   useNewUrlParser: true,
@@ -22,7 +24,9 @@ conn.on("error", e => {
 });
 
 module.exports = {
+  Counters: mongoose.model("Counters"),
   Users: mongoose.model("Users"),
   Articles: mongoose.model("Articles"),
-  Counters: mongoose.model("Counters")
+  Comments: mongoose.model("Comments"),
+  Replies: mongoose.model("Replies")
 };

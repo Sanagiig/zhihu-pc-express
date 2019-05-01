@@ -38,7 +38,8 @@ module.exports = exports = function (schema, name) {
         }
         if (!data) {
           new Counters({
-            _id: name
+            _id: name,
+            id: 0
           }).save(ep.done("create"));
         } else {
           ep.emit("create", data);

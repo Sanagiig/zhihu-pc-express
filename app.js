@@ -13,7 +13,8 @@ var redisOpt = {
   host: config.redisHost,
   port: config.redisPort,
   ttl: config.sessionTTL,
-  pass: config.RedisPass
+  pass: config.RedisPass,
+  no_ready_check: true,
 };
 
 app.use("/static", express.static(path.join(__dirname, "static")));
@@ -32,7 +33,7 @@ app.use(
 // 使用 session 中间件
 app.use(
   session({
-    no_ready_check: true,
+
     secret: config.secretCode, // 对session id 相关的cookie 进行签名
     resave: true,
     saveUninitialized: false, // 是否保存未初始化的会话

@@ -93,9 +93,11 @@ router.post("/login", function (req, res, next) {
     return next(err);
   }
 
-  Users.findOne({
+  Users.findOneAndUpdate({
     loginName,
     password
+  }, {
+    lastLoginAt: Date.now()
   }).exec(function (err, data) {
     if (err) {
       err.tip = "账号密码检测异常";
@@ -128,11 +130,17 @@ router.get("/get", function (req, res, next) {
     role
   } = token ? token : {};
   let serachParams = req.query;
+  let fields;
+
   const ep = new eventProxy();
   ep.on("suc", function (data) {
-    data.followCount = data.follow.length;
-    data.followedCount = data.followed.length;
-    data.password = null;
+    if (data) {
+      data.followCount = data.follow.length;
+      data.followedCount = data.followed.length;
+      data.password = null;
+    } else {
+      data = config.guestInfo;
+    }
 
     if (id !== data.id && role !== "admin") {
       data.follow = null;
@@ -156,8 +164,9 @@ router.get("/get", function (req, res, next) {
       id
     };
   }
+
   if (id) {
-    // 查询当前登录用户的信息
+    // 查询用户的信息
     Users.findOne(
       serachParams).lean().exec(ep.done("suc"));
   } else {

@@ -29,7 +29,13 @@ const config = {
   // 是否应用testApi
   testApi: true,
   //需要登陆才能访问的列表
-  needLoginUrl: ["/api/articles/upload", "/api/articles/delete", "/api/upload/image", "/api/follow//follow"],
+  needLoginUrl: [
+    "/api/articles/upload",
+    "/api/articles/delete",
+    "/api/comments/add",
+    "/api/upload/image",
+    "/api/follow/follow"
+  ],
   // 不允许用户看已删除数据的列表
   limitSearchUrl: [/.*(articles|comments)\/get/],
   // 来客信息

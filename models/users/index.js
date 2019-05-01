@@ -72,11 +72,11 @@ const schema = Schema({
     type: Number,
     default: 0
   },
-  thumbUpArticle: {
+  thumbUpArticles: {
     type: [Number],
     default: []
   },
-  thumbDownArticle: {
+  thumbDownArticles: {
     type: [Number],
     default: []
   },
@@ -87,13 +87,32 @@ const schema = Schema({
     type: Number,
     default: 0
   },
-  thumbUpComment: {
+  thumbUpComments: {
     type: [Number],
     default: []
   },
-  thumbDownComment: {
+  thumbDownComments: {
     type: [Number],
     default: []
+  },
+  replies: {
+    type: [Number]
+  },
+  repliesCount: {
+    type: Number,
+    default: 0
+  },
+  thumbUpReplies: {
+    type: [Number],
+    default: []
+  },
+  thumbDownReplies: {
+    type: [Number],
+    default: []
+  },
+  isDelete: {
+    type: Boolean,
+    default: false
   },
   createAt: {
     type: Date,
