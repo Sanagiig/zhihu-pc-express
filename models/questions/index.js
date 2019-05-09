@@ -10,6 +10,15 @@ const schema = Schema({
         type: String,
         default: 'article'
     },
+    // 分类
+    class: {
+        default: [],
+        type: [String],
+    },
+    tags: {
+        type: [String],
+        default: []
+    },
     author: {
         type: Schema.Types.ObjectId,
         require: [true, "author is empty"],
@@ -19,22 +28,22 @@ const schema = Schema({
         type: Number,
         require: [true, "authorId is empty"]
     },
-    // 归属
-    belongTo: {
-        type: Number,
-        require: [true, "belongId is empty"]
+    title: {
+        type: String,
+        require: [true, "title is empty"]
     },
     content: {
         type: String,
         require: [true, "content is empty"]
     },
-    thumbUpUsers: {
-        type: [Number],
+    // 关注、被关注的信息
+    followed: {
+        type: Array,
         default: []
     },
-    thumbDownUsers: {
-        type: [Number],
-        default: []
+    followedCount: {
+        type: Number,
+        default: 0
     },
     isDelete: {
         type: Boolean,
@@ -50,10 +59,10 @@ const schema = Schema({
     }
 })
 
-base(schema, "Comments");
+base(schema, "Questions");
 schema.index({
     createAt: -1,
     updateAt: -1,
-    id: 1
+    id: -1
 });
-mongoose.model("Comments", schema);
+mongoose.model("Questions", schema);

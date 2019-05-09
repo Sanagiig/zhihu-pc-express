@@ -7,6 +7,9 @@ require("./articles");
 require("./counters");
 require("./comments");
 require("./replies");
+require("./questions");
+require("./answers");
+require("./works");
 
 mongoose.connect(config.dbUrl, {
   useNewUrlParser: true,
@@ -28,5 +31,8 @@ module.exports = {
   Users: mongoose.model("Users"),
   Articles: mongoose.model("Articles"),
   Comments: mongoose.model("Comments"),
-  Replies: mongoose.model("Replies")
+  Replies: mongoose.model("Replies"),
+  Questions: mongoose.model("Questions"),
+  Answers: mongoose.model("Answers"),
+  Works: mongoose.model("Works")
 };

@@ -8,7 +8,7 @@ const schema = Schema({
     },
     type: {
         type: String,
-        default: 'normal'
+        default: 'article'
     },
     author: {
         type: Schema.Types.ObjectId,

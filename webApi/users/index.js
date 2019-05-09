@@ -135,16 +135,20 @@ router.get("/get", function (req, res, next) {
   const ep = new eventProxy();
   ep.on("suc", function (data) {
     if (data) {
-      data.followCount = data.follow.length;
-      data.followedCount = data.followed.length;
-      data.password = null;
+      data = data.map(item => {
+        item.followCount = item.follow.length;
+        item.followedCount = item.followed.length;
+        item.password = null;
+
+        if (id !== item.id && role !== "admin") {
+          item.follow = null;
+          item.followed = null;
+        }
+        return item
+      })
+
     } else {
       data = config.guestInfo;
-    }
-
-    if (id !== data.id && role !== "admin") {
-      data.follow = null;
-      data.followed = null;
     }
     res.json({
       code: 0,
@@ -159,16 +163,14 @@ router.get("/get", function (req, res, next) {
   });
 
   // 默认只有 isDelete
-  if (!serachParams.id && role !== 'admin') {
-    serachParams = {
-      id
-    };
-  }
-
-  if (id) {
+  if (serachParams.id || role === 'admin') {
     // 查询用户的信息
-    Users.findOne(
+    Users.find(
       serachParams).lean().exec(ep.done("suc"));
+  } else if (id) {
+    Users.find({
+      id
+    }).lean().exec(ep.done("suc"));
   } else {
     res.json({
       code: 1,
@@ -177,8 +179,6 @@ router.get("/get", function (req, res, next) {
       msg: "尚未登录"
     });
   }
-
-  Users.findOne();
 });
 
 // 更新用户信息
@@ -213,7 +213,7 @@ router.post("/update", function (req, res, next) {
   Users.createOrUpdate(userInfo, ep.done('suc'));
 })
 
-// 关注 | 取关
+// 关注
 router.post("/follow", function (req, res, next) {
   var {
     id
@@ -228,17 +228,13 @@ router.post("/follow", function (req, res, next) {
 
     // 判断数据是否同步
     if (!!data[0] !== !!data[1]) {
-      let err = new Error(`follow [${id}] & followed [${otherId}]  数据不同步`);
-      err.tip = '数据同步错误, 请通知管理员';
-      return ep.emit(err);
+      log('error', `/aip/users/follow  follow_user [${id}] & followed_user [${otherId}]  数据不同步`);
     }
 
     // 将数据取出
-    if (!!data[0] && !!data[1]) {
-      result = {
-        follow: data[0].follow || data[1].follow,
-        followedCount: (data[0].followed && data[0].followed.length) || (data[1].followed && data[1].followed.length)
-      }
+    result = {
+      follow: data[0].follow || data[1].follow,
+      followedCount: (data[0].followed && data[0].followed.length) || (data[1].followed && data[1].followed.length)
     }
     // 更新 redis
     // req.session.token.follow = follow;

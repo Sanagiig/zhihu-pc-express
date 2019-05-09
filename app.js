@@ -50,7 +50,6 @@ app.use(function (req, res, next) {
 midware.register(app);
 
 app.all("/api/test", function (req, res, next) {
-  console.log(req.body);
   res.json({
     test: "yes"
   });

@@ -343,8 +343,6 @@ function thumb(type, req, res, next, targetModel, thumbUpField, thumbDownField) 
         });
     })
     ep.on('minus', function (data) {
-        console.log('re', artRemoveThumbUpdate)
-        console.log('ure', userRemoveThumbUpdate)
         targetModel.findOneAndUpdate({
             id: artId
         }, artRemoveThumbUpdate, {
@@ -412,11 +410,41 @@ function thumb(type, req, res, next, targetModel, thumbUpField, thumbDownField) 
     })
 }
 
+function userInfoAssemble(ep, data, userIdList, fields) {
+    Users.find({
+            id: {
+                $in: userIdList
+            },
+        }, fields)
+        .lean()
+        .exec(function (err, users) {
+            if (err) {
+                return ep.emit('error', err)
+            }
+            // 组装数据
+            for (var i = 0, len = data.data.length; i < len; i++) {
+                for (var j = 0, len2 = users.length; j < len2; j++) {
+                    // 组装 author 字段
+                    if (data.data[i].authorId === users[j].id) {
+                        data.data[i].author = users[j]
+                    }
+
+                    // 组装 replyTo 字段
+                    if (data.data[i].replyTo === users[j].id) {
+                        data.data[i].replyTo = users[j]
+                    }
+                }
+            }
+
+            ep.emit('userinfo_assemble_ok', data);
+        })
+}
+
 module.exports = {
     getCount,
     getPagination,
     get,
     update,
     thumb,
-
+    userInfoAssemble
 }

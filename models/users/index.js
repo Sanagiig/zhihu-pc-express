@@ -61,9 +61,42 @@ const schema = Schema({
     type: Array,
     default: []
   },
+  followCount: {
+    type: Number,
+    default: 0
+  },
   followed: {
     type: Array,
     default: []
+  },
+  followedCount: {
+    type: Number,
+    default: 0
+  },
+  // 关注的问题、文章、作品
+  followQuestion: {
+    type: Array,
+    default: []
+  },
+  followQuestionCount: {
+    type: Number,
+    default: 0
+  },
+  followArticle: {
+    type: Array,
+    default: []
+  },
+  followArticleCount: {
+    type: Number,
+    default: 0
+  },
+  followWork: {
+    type: Array,
+    default: []
+  },
+  followWorkCount: {
+    type: Number,
+    default: 0
   },
   articles: {
     type: [Number]
@@ -77,6 +110,22 @@ const schema = Schema({
     default: []
   },
   thumbDownArticles: {
+    type: [Number],
+    default: []
+  },
+  thumbUpAnswers: {
+    type: [Number],
+    default: []
+  },
+  thumbDownAnswers: {
+    type: [Number],
+    default: []
+  },
+  thumbUpWorks: {
+    type: [Number],
+    default: []
+  },
+  thumbDownWorks: {
     type: [Number],
     default: []
   },
@@ -99,6 +148,27 @@ const schema = Schema({
     type: [Number]
   },
   repliesCount: {
+    type: Number,
+    default: 0
+  },
+  questions: {
+    type: [Number]
+  },
+  questionCount: {
+    type: Number,
+    default: 0
+  },
+  answers: {
+    type: [Number]
+  },
+  answerCount: {
+    type: Number,
+    default: 0
+  },
+  works: {
+    type: [Number]
+  },
+  workCount: {
     type: Number,
     default: 0
   },

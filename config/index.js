@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const user = require('./config.user');
+const question = require('./config.question');
 const log = require('../recorder').log;
 
 const makeDirs = function (dir, cb) {
@@ -50,8 +51,10 @@ const config = {
     avator: path.join(upPath, '/avator'),
     // 文件
     file: path.join(upPath, '/file')
-  }
+  },
 
+  // 问题相关
+  questionClassList: question.classList
 };
 
 // 创建相关文件夹

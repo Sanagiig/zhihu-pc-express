@@ -50,10 +50,10 @@ const schema = Schema({
     }
 })
 
-base(schema, "Comments");
+base(schema, "Works");
 schema.index({
     createAt: -1,
     updateAt: -1,
     id: 1
 });
-mongoose.model("Comments", schema);
+mongoose.model("Works", schema);

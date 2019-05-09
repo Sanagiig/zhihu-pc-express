@@ -97,7 +97,6 @@ router.get('/getPagination/:pageSize/:curPage', function (req, res, next) {
             result: data
         })
     })
-
 })
 
 
