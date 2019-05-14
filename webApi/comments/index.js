@@ -79,7 +79,7 @@ router.post('/add', function (req, res, next) {
     var token = req.session.token
     const ep = new eventProxy();
 
-    ep.on('ok', function (data) {
+    ep.on('add_ok', function (data) {
         res.json({
             code: 0,
             status: 'success',
@@ -99,7 +99,7 @@ router.post('/add', function (req, res, next) {
 
     params.authorId = token.id;
     params.author = token._id;
-    Comments.createOrUpdate(params, ep.done('ok'));
+    Comments.createOrUpdate(params, ep.done('add_ok'));
 })
 
 

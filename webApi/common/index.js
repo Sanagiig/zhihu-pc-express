@@ -80,8 +80,8 @@ function getPagination(req, res, next, targetModel, fields, notSend) {
                 // 处理点赞信息
                 if (data && data.length && data[0].thumbUpUsers) {
                     data = data.map(item => {
-                        item.thumbUp = item.thumbUpUsers.length;
-                        item.thumbDown = item.thumbDownUsers.length;
+                        item.thumbUpCount = item.thumbUpUsers.length;
+                        item.thumbDownCount = item.thumbDownUsers.length;
                         item.thumbUpUsers = null;
                         item.thumbDownUsers = null;
                         return item
@@ -131,7 +131,7 @@ function getPagination(req, res, next, targetModel, fields, notSend) {
 function get(req, res, next, targetModel, fields, notSend) {
     var params = req.query;
     const ep = new eventProxy();
-    ep.on('ok', function (data) {
+    ep.on('get_ok', function (data) {
         if (notSend) return;
 
         res.json({
@@ -151,7 +151,7 @@ function get(req, res, next, targetModel, fields, notSend) {
         return next(err);
     })
 
-    targetModel.find(params, fields).lean().exec(ep.done('ok'));
+    targetModel.find(params, fields).lean().exec(ep.done('get_ok'));
     return ep;
 }
 
@@ -203,7 +203,10 @@ function update(req, res, next, targetModel, newData, fields, notSend) {
  * @param {String} thumbDownField 
  */
 function thumb(type, req, res, next, targetModel, thumbUpField, thumbDownField) {
-    var artId = req.body.id;
+    var {
+        id,
+        active
+    } = req.body;
     var token = req.session.token;
     var userId = token ?
         token.id :
@@ -226,7 +229,7 @@ function thumb(type, req, res, next, targetModel, thumbUpField, thumbDownField) 
 
     if (type === 'thumbUp') {
         artThumb = {
-            id: artId,
+            id,
             thumbUpUsers: {
                 $in: userId
             }
@@ -242,10 +245,10 @@ function thumb(type, req, res, next, targetModel, thumbUpField, thumbDownField) 
         }
         userAddThumbUpdate = {
             $push: {
-                [thumbUpField]: artId
+                [thumbUpField]: id
             },
             $pull: {
-                [thumbDownField]: artId
+                [thumbDownField]: id
             },
 
         }
@@ -257,7 +260,7 @@ function thumb(type, req, res, next, targetModel, thumbUpField, thumbDownField) 
         }
         userRemoveThumbUpdate = {
             $pull: {
-                [thumbUpField]: artId
+                [thumbUpField]: id
             }
         }
         // 错误提示
@@ -265,7 +268,7 @@ function thumb(type, req, res, next, targetModel, thumbUpField, thumbDownField) 
         errTipByRemove = '用户取消点赞操作存储异常'
     } else if (type === 'thumbDown') {
         artThumb = {
-            id: artId,
+            id,
             thumbDownUsers: {
                 $in: userId
             }
@@ -281,10 +284,10 @@ function thumb(type, req, res, next, targetModel, thumbUpField, thumbDownField) 
         }
         userAddThumbUpdate = {
             $push: {
-                [thumbDownField]: artId
+                [thumbDownField]: id
             },
             $pull: {
-                [thumbUpField]: artId
+                [thumbUpField]: id
             },
         }
         // 取消踩
@@ -295,7 +298,7 @@ function thumb(type, req, res, next, targetModel, thumbUpField, thumbDownField) 
         }
         userRemoveThumbUpdate = {
             $pull: {
-                [thumbDownField]: artId
+                [thumbDownField]: id
             }
         }
         // 错误提示
@@ -316,7 +319,7 @@ function thumb(type, req, res, next, targetModel, thumbUpField, thumbDownField) 
     }
     ep.on('add', function (data) {
         targetModel.findOneAndUpdate({
-            id: artId
+            id
         }, artAddThumbUpdate, {
             fields: {
                 thumbUpUsers: 1,
@@ -344,7 +347,7 @@ function thumb(type, req, res, next, targetModel, thumbUpField, thumbDownField) 
     })
     ep.on('minus', function (data) {
         targetModel.findOneAndUpdate({
-            id: artId
+            id
         }, artRemoveThumbUpdate, {
             fields: {
                 thumbUpUsers: 1,
@@ -379,8 +382,8 @@ function thumb(type, req, res, next, targetModel, thumbUpField, thumbDownField) 
             code: 0,
             status: 'success',
             result: {
-                thumbUp: result.thumbUpUsers.length,
-                thumbDown: result.thumbDownUsers.length,
+                thumbUpCount: result.thumbUpUsers.length,
+                thumbDownCount: result.thumbDownUsers.length,
                 isThumbUp: type === 'thumbUp' ? result.thumbUpUsers.indexOf(userId) !== -1 : false,
                 isThumbDown: type === 'thumbDown' ? result.thumbDownUsers.indexOf(userId) !== -1 : false,
             }
@@ -389,25 +392,144 @@ function thumb(type, req, res, next, targetModel, thumbUpField, thumbDownField) 
     ep.on('error', function (err) {
         next(err);
     })
-    if (!userId) {
-        err = new Error('请先登录, 再评论');
-        err.tip = '请先登录, 再评论';
-        return next(err);
-    } else if (!artId) {
+
+    if (!id) {
         err = new Error('参数不足，无法查找对应内容');
         err.tip = '参数不足，无法查找对应内容';
         return next(err);
     }
-    targetModel.findOne(artThumb, ['id'], function (err, data) {
-        if (err) {
-            return next(err);
-        }
-        if (data) {
-            ep.emit('minus');
+
+    // active 决定是添加还是取消
+    if (active) {
+        ep.emit('add');
+    } else {
+        ep.emit('minus');
+    }
+
+}
+
+
+// 关注
+/**
+ * 
+ * @param {Object} req 
+ * @param {Object} res 
+ * @param {Object} next 
+ * @param {Object} targetModel 
+ * @param {String} fieldMap 用户关注的列表字段Map
+ * @param {Boolean} notSend 
+ */
+function follow(req, res, next, targetModel, fieldMap, notSend) {
+    var {
+        id
+    } = req.session.token;
+    var otherId = req.body.id;
+    var isFollow = req.body.isFollow;
+    const ep = new eventProxy();
+
+    ep.after('follow_ok', 2, function (data) {
+        // 取出 follow
+        var result, msg
+        console.log('data',data)
+        if (data[0] && data[1]) {
+            // 将数据取出
+            result = {
+                followCount: data[0].followCount || data[1].followCount || 0,
+                followedCount: data[0].followedCount || data[1].followedCount || 0
+            }
         } else {
-            ep.emit('add');
+            // 数据不同步
+            msg = '数据不同步'
+            log('error', `${req.path} ${fieldMap.follow}[${id}] &  followed [${otherId}]  数据不同步`);
+        }
+
+        if (!notSend) {
+            res.json({
+                code: 0,
+                status: msg ? 'warning' : 'success',
+                msg: msg || 'ok',
+                result: result
+            })
         }
     })
+
+    ep.on('error', function (err) {
+        err.tip = err.tip || '关注失败,请稍后再试';
+        next(err);
+    })
+
+    if (!otherId && typeof isFollow !== 'boolean') {
+        return ep.emit('error', new Error('参数错误 id | isFollow'));
+    }
+
+    if (isFollow) {
+        // 更新自身信息
+        Users.findOneAndUpdate({
+            id: id,
+            [fieldMap.follow]: {
+                $ne: otherId
+            }
+        }, {
+            $push: {
+                [fieldMap.follow]: otherId
+            },
+            $inc:{[fieldMap.followCount]:1}
+        }, {
+            new: true,
+            fields: {
+                [fieldMap.followCount]: 1
+            }
+        }).exec(ep.done('follow_ok'));
+        // 更新被关注的信息
+        targetModel.findOneAndUpdate({
+            id: otherId,
+            followed: {
+                $ne: id
+            }
+        }, {
+            $push: {
+                followed: id
+            },
+            $inc:{followedCount:1}
+        }, {
+            new: true,
+            fields: {
+                followedCount: 1
+            }
+        }).exec(ep.done('follow_ok'));
+    } else {
+        // 更新自身信息
+        Users.findOneAndUpdate({
+            id,
+            [fieldMap.follow]: otherId
+        }, {
+            $pull: {
+                [fieldMap.follow]: otherId
+            },
+            $inc:{[fieldMap.followCount]:-1}
+        }, {
+            new: true,
+            fields: {
+                [fieldMap.followCount]: 1
+            }
+        }).exec(ep.done('follow_ok'));
+        // 更新被关注者信息
+        targetModel.findOneAndUpdate({
+            id: otherId,
+            followed: id
+        }, {
+            $pull: {
+                followed: id
+            },
+            $inc:{followedCount:-1}
+        }, {
+            new: true,
+            fields: {
+                followedCount: 1
+            }
+        }).exec(ep.done('follow_ok'));
+    }
+    return ep
 }
 
 function userInfoAssemble(ep, data, userIdList, fields) {
@@ -446,5 +568,6 @@ module.exports = {
     get,
     update,
     thumb,
+    follow,
     userInfoAssemble
 }

@@ -58,7 +58,7 @@ app.all("/api/test", function (req, res, next) {
 app.use("/api", apiRouter);
 
 app.use(function (err, req, res, next) {
-  log("error", `${err.tip || "服务器异常, 请骚后再试"} [${err.message}]`);
+  log("error", `{ ${req.path} } :${err.tip || "服务器异常, 请骚后再试"} [${err.message}]`);
   res.json({
     code: err.code || 1,
     status: "error",

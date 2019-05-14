@@ -36,9 +36,17 @@ const schema = Schema({
         type: [Number],
         default: []
     },
+    thumbUpCount: {
+        type: Number,
+        default: 0
+    },
     thumbDownUsers: {
         type: [Number],
         default: []
+    },
+    thumbDownCount: {
+        type: Number,
+        default: 0
     },
     isDelete: {
         type: Boolean,

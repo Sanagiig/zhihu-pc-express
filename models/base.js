@@ -15,7 +15,7 @@ module.exports = exports = function (schema, name) {
     this.update_at = Date.now();
   });
   schema.statics.test = function () {};
-  schema.statics.createOrUpdate = function (obj, cb) {
+  schema.statics.createOrUpdate = function (obj,fields, cb) {
     const ep = new eventProxy();
     const Model = this.model(name);
 
@@ -50,16 +50,16 @@ module.exports = exports = function (schema, name) {
     ep.on("create", function (num) {
       obj.id = typeof num === "number" ? num : num.id || 1;
       let modelInstance = new Model(obj);
-      modelInstance.save(cb);
+      modelInstance.save(cb,fields);
     });
 
     ep.on('update', function () {
       Model.findOneAndUpdate({
           id: obj.id
         }, obj, {
-          new: true
+          new: true,
+          fields
         },
-
         cb
       );
     })
@@ -67,6 +67,11 @@ module.exports = exports = function (schema, name) {
       err.tip = "创建失败";
       throw err;
     });
+
+    if(arguments.length === 2){
+      cb = fields;
+      fields = '';
+    }
     if (obj.id) {
       ep.emit('update');
     } else {

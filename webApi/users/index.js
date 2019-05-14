@@ -4,7 +4,7 @@ const passCipher = require("../../utils").passCipher;
 const Users = require("../../models").Users;
 const config = require("../../config");
 const log = require("../../recorder").log;
-
+const common = require("../common")
 router.post("/register", function (req, res, next) {
   const ep = new eventProxy();
   var loginName = req.body.loginName;
@@ -131,7 +131,7 @@ router.get("/get", function (req, res, next) {
   } = token ? token : {};
   let serachParams = req.query;
   let fields;
-
+  console.log('pa', req.query)
   const ep = new eventProxy();
   ep.on("suc", function (data) {
     if (data) {
@@ -175,7 +175,7 @@ router.get("/get", function (req, res, next) {
     res.json({
       code: 1,
       status: "success",
-      result: config.guestInfo,
+      result: [config.guestInfo],
       msg: "尚未登录"
     });
   }
@@ -215,102 +215,13 @@ router.post("/update", function (req, res, next) {
 
 // 关注
 router.post("/follow", function (req, res, next) {
-  var {
-    id
-  } = req.session.token;
-  var otherId = req.body.id;
-  var isFollow = req.body.isFollow;
-  const ep = new eventProxy();
-
-  ep.after('ok', 2, function (data) {
-    // 取出 follow
-    var result
-
-    // 判断数据是否同步
-    if (!!data[0] !== !!data[1]) {
-      log('error', `/aip/users/follow  follow_user [${id}] & followed_user [${otherId}]  数据不同步`);
-    }
-
-    // 将数据取出
-    result = {
-      follow: data[0].follow || data[1].follow,
-      followedCount: (data[0].followed && data[0].followed.length) || (data[1].followed && data[1].followed.length)
-    }
-    // 更新 redis
-    // req.session.token.follow = follow;
-    // req.save();
-
-    res.json({
-      code: 0,
-      status: 'success',
-      msg: 'ok',
-      result: result
-    })
-  })
-
-  ep.on('error', function (err) {
-    err.tip = err.tip || '关注失败,请稍后再试';
-    next(err);
-  })
-  if (!otherId && typeof isFollow !== 'boolean') {
-    return ep.emit('error', new Error('参数错误'));
+  var fieldMap = {
+    follow: 'follow',
+    followCount: 'followCount',
+    // 被专注目标的记录字段
+    followedCount: 'followedCount'
   }
-
-  if (!isFollow) {
-    // 更新自身信息
-    Users.findOneAndUpdate({
-      id: id,
-    }, {
-      $push: {
-        follow: otherId
-      }
-    }, {
-      new: true,
-      fields: {
-        follow: 1
-      }
-    }).$where(`this.follow.indexOf(${otherId}) === -1`).exec(ep.done('ok'));
-    // 更新被关注者信息
-    Users.findOneAndUpdate({
-      id: otherId,
-    }, {
-      $push: {
-        followed: id
-      }
-    }, {
-      new: true,
-      fields: {
-        followed: 1
-      }
-    }).$where(`this.followed.indexOf(${id}) === -1`).exec(ep.done('ok'));
-  } else {
-    // 更新自身信息
-    Users.findOneAndUpdate({
-      id,
-    }, {
-      $pull: {
-        follow: otherId
-      }
-    }, {
-      new: true,
-      fields: {
-        follow: 1
-      }
-    }).$where(`this.follow.indexOf(${otherId}) !== -1`).exec(ep.done('ok'));
-    // 更新被关注者信息
-    Users.findOneAndUpdate({
-      id: otherId,
-    }, {
-      $pull: {
-        followed: id
-      }
-    }, {
-      new: true,
-      fields: {
-        followed: 1
-      }
-    }).$where(`this.followed.indexOf(${id}) !== -1`).exec(ep.done('ok'));
-  }
+  common.follow(req, res, next, Users, fieldMap)
 })
 
 module.exports = router;

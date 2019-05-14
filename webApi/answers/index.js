@@ -21,7 +21,7 @@ router.get('/get', function (req, res, next) {
         'author'
     ]
 
-    ep.on('ok', function (data) {
+    ep.on('get_ok', function (data) {
         res.json({
             code: 0,
             status: 'success',
@@ -33,7 +33,7 @@ router.get('/get', function (req, res, next) {
     ep.on('error', function (err) {
         next(err);
     })
-    Answers.find(params, fields).exec(ep.done('ok'));
+    Answers.find(params, fields).exec(ep.done('get_ok'));
 })
 
 router.get('/getPagination/:pageSize/:curPage', function (req, res, next) {
@@ -82,7 +82,7 @@ router.post('/add', function (req, res, next) {
     var token = req.session.token
     const ep = new eventProxy();
 
-    ep.on('ok', function (data) {
+    ep.on('add_ok', function (data) {
         res.json({
             code: 0,
             status: 'success',
@@ -101,7 +101,7 @@ router.post('/add', function (req, res, next) {
 
     params.authorId = token.id;
     params.author = token._id;
-    Answers.createOrUpdate(params, ep.done('ok'));
+    Answers.createOrUpdate(params, ep.done('add_ok'));
 })
 
 const thumb = common.thumb

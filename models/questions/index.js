@@ -32,6 +32,10 @@ const schema = Schema({
         type: String,
         require: [true, "title is empty"]
     },
+    simpleText: {
+        type: String,
+        default:''
+    },
     content: {
         type: String,
         require: [true, "content is empty"]

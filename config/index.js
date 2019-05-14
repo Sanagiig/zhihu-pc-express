@@ -3,18 +3,8 @@ const path = require('path');
 const user = require('./config.user');
 const question = require('./config.question');
 const log = require('../recorder').log;
+const makeDirs = require('../utils').makeDirs;
 
-const makeDirs = function (dir, cb) {
-  fs.exists(dir, function (isAccess) {
-    if (isAccess) {
-      cb();
-    } else {
-      makeDirs(path.dirname(dir), function () {
-        fs.mkdir(dir, cb);
-      })
-    }
-  });
-}
 
 const upPath = path.join(__dirname, '/../static/upload/');
 const config = {
@@ -35,10 +25,13 @@ const config = {
     "/api/articles/delete",
     "/api/comments/add",
     "/api/upload/image",
-    "/api/follow/follow"
+    "/api/follow/follow",
+    /^\/api\/.*upload/,
+    // 点赞 | 反对
+    /^\/api\/.*(thumbUp|thumbDown)/
   ],
   // 不允许用户看已删除数据的列表
-  limitSearchUrl: [/.*(articles|comments)\/get/],
+  limitSearchUrl: [/\/api\/(articles|comments|users)\/get/],
   // 来客信息
   guestInfo: user.guestInfo,
   // 上传位置
@@ -50,7 +43,9 @@ const config = {
     // 头像
     avator: path.join(upPath, '/avator'),
     // 文件
-    file: path.join(upPath, '/file')
+    file: path.join(upPath, '/file'),
+    // 作品
+    work: path.join(upPath, '/work/{loginName}/{workId}'),
   },
 
   // 问题相关

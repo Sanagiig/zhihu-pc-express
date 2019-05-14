@@ -6,35 +6,44 @@ const schema = Schema({
         type: Number,
         require: [true, "id is empty"]
     },
-    type: {
-        type: String,
-        default: 'article'
-    },
-    author: {
-        type: Schema.Types.ObjectId,
-        require: [true, "author is empty"],
-        ref: "Users",
-    },
     authorId: {
-        type: Number,
-        require: [true, "authorId is empty"]
+        type: Schema.Types.ObjectId,
+        ref: "Users",
+        require: [true, "author is empty"]
     },
-    // 归属
-    belongTo: {
-        type: Number,
-        require: [true, "belongId is empty"]
+    title: {
+        type: String,
+        require: [true, "title is empty"]
+    },
+    simpleText: {
+        type: String,
+        require: [true, "simpleText is empty"]
     },
     content: {
         type: String,
         require: [true, "content is empty"]
     },
-    thumbUpUsers: {
-        type: [Number],
-        default: []
+    type: {
+        type: [String],
+        default: ["normal"]
     },
-    thumbDownUsers: {
-        type: [Number],
-        default: []
+    displayUrl: {
+        type: String,
+        default: null
+    },
+    thumbUpUsers: [Number],
+    thumbUpCount: {
+        type: Number,
+        default: 0
+    },
+    thumbDownUsers: [Number],
+    thumbDownCount: {
+        type: Number,
+        default: 0
+    },
+    commentCount: {
+        type: Number,
+        default: 0
     },
     isDelete: {
         type: Boolean,

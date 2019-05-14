@@ -29,12 +29,12 @@ var schema = new Schema({
     default: ["normal"]
   },
   thumbUpUsers: [Number],
-  thumbUp: {
+  thumbUpCount: {
     type: Number,
     default: 0
   },
   thumbDownUsers: [Number],
-  thumbDown: {
+  thumbDownCount: {
     type: Number,
     default: 0
   },
